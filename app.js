@@ -4,6 +4,11 @@ const inquirer = require("inquirer");
 const GET_ALL_EMPLOYEES = "Get all employees";
 const GET_DEPARTMENTS = "Get departments";
 const GET_ROLES = "Get roles";
+const EXIT = "Exit";
+const ADD_EMPLOYEE = "Add employee";
+const ADD_DEPARTMENT = "Add department";
+const ADD_ROLE = "Add role";
+const DELETE_EMPLOYEE ="Delete employee";
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -25,31 +30,43 @@ async function main() {
         name: "task",
         message: "What would you like to do?",
         type: "list",
-        choices: [GET_ALL_EMPLOYEES,GET_DEPARTMENTS,GET_ROLES, "Add employee","Add department","Add role", "exit"]
+        choices: [GET_ALL_EMPLOYEES,GET_DEPARTMENTS,GET_ROLES, ADD_EMPLOYEE,ADD_DEPARTMENT,ADD_ROLE,DELETE_EMPLOYEE,EXIT, new inquirer.Separator("\n\n")]
     }]);
-    const task = answers.task;
-    if (task === "exit") {
-        console.log("thanks for using");
-        return
-    } else if (task === GET_ALL_EMPLOYEES) {
-        connection.query(" SELECT * FROM EMPLOYEE ", function (err, data) {
-            console.table(data);
-        });
-    } else if (task === "Add employee") {
-        addEmployee();
-    } else if (task === "Add department"){
-        addDepartment();
-    }else if (task === GET_DEPARTMENTS) {
-        connection.query(" SELECT * FROM DEPARTMENT ", function (err, data) {
-            console.table(data);
-        });
-    }else if (task === GET_ROLES) {
-        connection.query(" SELECT * FROM ROLE ", function (err, data) {
-            console.table(data);
-        });
-    }else if (task === "Add role"){
-        addRole();
+    //
+        const task = answers.task;
+    switch(task){
+        case EXIT:
+            console.log("thanks for using");
+            break;
+        case GET_ALL_EMPLOYEES:
+            connection.query(" SELECT * FROM EMPLOYEE ", function (err, data){
+                console.table(data);
+            });
+            break;
+        case ADD_EMPLOYEE:
+            addEmployee();
+            break;
+        case GET_DEPARTMENTS:
+            connection.query(" SELECT * FROM DEPARTMENT ", function (err, data) {
+                 console.table(data);  
+                });
+                break;
+        case ADD_DEPARTMENT:
+            addDepartment();
+            break;
+        case GET_ROLES:
+            connection.query(" SELECT * FROM ROLE ", function (err, data) {
+                console.table(data);
+                });
+                break;
+        case ADD_ROLE:
+            addRole();
+            break;
+        case DELETE_EMPLOYEE:
+            deleteEmployee();
+            break;
     }
+    
 }
 async function addEmployee() {
     const answers = await inquirer.prompt([
@@ -150,4 +167,24 @@ async function addRole() {
         }
     );
 }
+async function deleteEmployee(){
+    const answers = await inquirer.prompt([
+        {
+            name: "id",
+            type: "input",
+            message: "Employee id:"
+        },
+    ]);
+
+    connection.query(
+        `DELETE FROM employee WHERE id = ${answers.id}`,
+        function (err) {
+            if (err) throw err;
+            console.log("Your employee was deleted successfully!");
+            // re-prompt the user for if they want to bid or post
+
+        }
+    );
+}
+
 main();
