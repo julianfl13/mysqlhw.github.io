@@ -3,6 +3,7 @@ const inquirer = require("inquirer");
 
 const GET_ALL_EMPLOYEES = "Get all employees";
 const GET_DEPARTMENTS = "Get departments";
+const GET_ROLES = "Get roles";
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -24,7 +25,7 @@ async function main() {
         name: "task",
         message: "What would you like to do?",
         type: "list",
-        choices: [GET_ALL_EMPLOYEES,GET_DEPARTMENTS, "Add employee","Add department", "exit"]
+        choices: [GET_ALL_EMPLOYEES,GET_DEPARTMENTS,GET_ROLES, "Add employee","Add department","Add role", "exit"]
     }]);
     const task = answers.task;
     if (task === "exit") {
@@ -42,6 +43,12 @@ async function main() {
         connection.query(" SELECT * FROM DEPARTMENT ", function (err, data) {
             console.table(data);
         });
+    }else if (task === GET_ROLES) {
+        connection.query(" SELECT * FROM ROLE ", function (err, data) {
+            console.table(data);
+        });
+    }else if (task === "Add role"){
+        addRole();
     }
 }
 async function addEmployee() {
@@ -107,5 +114,40 @@ async function addDepartment(){
         }
     );
 
+}
+async function addRole() {
+    const answersRole = await inquirer.prompt([
+        {
+            name: "title",
+            type: "input",
+            message: "Role title:"
+        },
+        {
+            name: "salary",
+            type: "input",
+            message: "Employee salary:"
+        },
+        {
+            name: "departmentRoleId",
+            type: "input",
+            message: "Employee Role ID:"
+        },
+    ]);
+
+    connection.query(
+        "INSERT INTO role SET ?",
+        {
+            title: answersRole.title,
+            salary: answersRole.salary,
+            department_id: answersRole.departmentRoleId,
+            
+        },
+        function (err) {
+            if (err) throw err;
+            console.log("Your role was created successfully!");
+            // re-prompt the user for if they want to bid or post
+
+        }
+    );
 }
 main();
